@@ -1,6 +1,58 @@
 #!/usr/bin/env python3
-import base64, zlib, os, sys
-if not os.path.exists("mgkan_key.txt"):
-    print("❌ No key found. Run MgKan.py first.")
-    sys.exit(1)
-exec(zlib.decompress(base64.b64decode("eJyNVMFu00AQvfsrpsuhtmS2EtwiBamIFlUtFEFvaWRt4kmyrb22dtdNrKo3uHFB4gjixI/xBXwCs2snTjBtWSmO5d2Z9+bNm32yd1AZfTCR6gDVDZS1XRTqeSDzstAWChODqelxZQoVg5U5xrAQZpHJCe1Uk1IXUzQmCF69TI5Pzo5gCCyfXwuVXGNtuAtjQZDiDLJCpEk6CaNBALSsrpsXt5bSLqAoUYVtmhj29X4EwsCsO+WWRltp5elwlzGcRX4fV1MsbXe2PXfLHA02gNu7GFhlMKX30fiuoXQjMpkKi45rSL+WWjqhKjZ0/SfapG/05FVZom6/ypnfUIUFqShs1KCNezSORWZIOPbr+2c4UR7WJ4N3GQqDTgwQcyEVZ+vEUtnQyc3dI4wieLEFMKK/8YjhqpS6fgTvlBj6g5hu8KaFsmJqQaT5NqYrxhfC52jDRq6Y5IoeBRCZRpHW4EIeRGnjL3Tlw7998uFekdYnGufSWNQJ5Xq4KcS44dh1oCPqxPKbY4objYPdb1xQG1Xq8wf3OXDZc6C3XVrlZZiS/Wcxgaao7PBZ1HDPqYVrg5fatZBdqt8/vv6EN69PD9/Cxfn5GTyF95W8kggfpkIp1JeKNRwaIguZodeng6VCXYWF4aWwC44rEsiE3Zxxu7Is2h2UxrFSlRWRIApf4EiRqlAXlXabA2ARN1bLslWzP4t/AVC/luxfM+nWjC+1tNgJ6oeSTDL47+T63uRNLTPuPBb2WW9evI1iyM2cjveGe1tOv7kL1PSLYnflmBDo9QMV3RPWdp+E/7geB/T6C+jGf9P59aIOa8yLG+w1tzNIbz623eYG6nDqbmSYa0GA6R6ciUpNF1LNOe8QCYnudYt5yNorH0xjR17WdCYgkZJEiRyTBIZ0qSeJM3eSsKb8xunBH6jr0Z0=")))
+import os, sys, json, time, hashlib, subprocess
+
+DB_FILE = "mgkan_keys.json"
+
+def load_db():
+    try:
+        with open(DB_FILE, 'r') as f:
+            return json.load(f)
+    except:
+        return {"keys": {}, "used": []}
+
+def validate_key(key):
+    db = load_db()
+    key = key.upper()
+    if key not in db["keys"]:
+        return False, "❌ Invalid key. Please try again."
+    if int(time.time()) > db["keys"][key]["expiry"]:
+        return False, "❌ Key expired. Please contact admin."
+    if key in db.get("used", []):
+        return False, "❌ Key already used. Please contact admin."
+    return True, "✅ Key valid"
+
+def register_use(key):
+    db = load_db()
+    if "used" not in db:
+        db["used"] = []
+    db["used"].append(key)
+    with open(DB_FILE, 'w') as f:
+        json.dump(db, f, indent=2)
+
+def main():
+    print("\n🔥 MGKAN TOOL - Ruijie Scanner\n")
+    
+    while True:
+        if not os.path.exists("mgkan_key.txt"):
+            key = input("🔑 Enter your key: ").strip()
+            with open("mgkan_key.txt", "w") as f:
+                f.write(key)
+        else:
+            with open("mgkan_key.txt", "r") as f:
+                key = f.read().strip()
+        
+        valid, msg = validate_key(key)
+        if valid:
+            print(msg)
+            break
+        else:
+            print(msg)
+            print("🔄 Please enter a valid key.\n")
+            os.remove("mgkan_key.txt")
+    
+    register_use(key)
+    print("✅ Access granted! Launching...\n")
+    os.system("python3 scanner.py")
+
+if __name__ == "__main__":
+    main()
