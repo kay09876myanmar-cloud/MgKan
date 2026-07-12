@@ -1,0 +1,9 @@
+aiohttp
+aiofiles
+ddddocr
+python-telegram-bot
+uvloop
+requests
+opencv-python-headless
+numpy
+urllib3
